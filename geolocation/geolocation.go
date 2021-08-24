@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -30,7 +32,15 @@ type GeoData struct {
 	db *sql.DB
 }
 
+type Metrics struct {
+	Duration time.Duration
+	Total    int
+	Rejected int
+	Imported int
+}
+
 func InitGeoData() (*GeoData, error) {
+	fmt.Println("INIT GEO DATA")
 	// DB_URL := os.Getenv("DB_URL")
 	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/geolocation"
 
@@ -142,21 +152,42 @@ func (geodata *GeoData) GetGeoData(ip string) (Geolocation, error) {
 	return geolocation, nil
 }
 
-func ReadCSV(geodata *GeoData) {
-	// Opening file
-	pwd, _ := os.Getwd()
-	fmt.Println("PWD", pwd)
-	recordFile, err := os.Open(pwd + "/geolocation/sample.csv")
-	// Path might not work on windows (use git-bash)
-
+func ReadCSVFile(file string, geodata *GeoData) (*Metrics, error) {
+	csvFile, err := os.Open(file)
 	if err != nil {
-		fmt.Println("Error:", err.Error())
+		fmt.Println("Error: Reading CSV File:", err.Error())
+		return nil, err
+	}
+	reader := csv.NewReader(csvFile)
+
+	metrics, err := importCSV(reader, geodata)
+	if err != nil {
+		return nil, err
+	}
+	err = csvFile.Close()
+	if err != nil {
+		fmt.Println("Error Closing CSV File", err.Error())
+	}
+	return metrics, nil
+}
+
+func ReadCSVUrl(url string, geodata *GeoData) (*Metrics, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
 	}
 
-	// Initialize the reader
-	reader := csv.NewReader(recordFile)
+	fmt.Println(resp)
+	reader := csv.NewReader(resp.Body)
+	metrics, err := importCSV(reader, geodata)
+	resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	return metrics, nil
+}
 
-	// Read row by row
+func importCSV(reader *csv.Reader, geodata *GeoData) (*Metrics, error) {
 	header, err := reader.Read()
 	if err != nil {
 		fmt.Println("Error:", err.Error())
@@ -164,6 +195,10 @@ func ReadCSV(geodata *GeoData) {
 	fmt.Println("Headers", header)
 	// Add check for header ???
 
+	var metrics Metrics
+	start := time.Now()
+
+	// Read row by row
 	for i := 0; ; i++ {
 		record, err := reader.Read()
 		if err == io.EOF {
@@ -171,7 +206,10 @@ func ReadCSV(geodata *GeoData) {
 		} else if err != nil {
 			fmt.Println("Error:", err.Error())
 		}
+		metrics.Total++
+
 		var geoloc Geolocation
+		fmt.Println("Record::", record)
 		geoloc.IP = record[0]
 		geoloc.CCode = record[1]
 		geoloc.Country = record[2]
@@ -179,26 +217,31 @@ func ReadCSV(geodata *GeoData) {
 		geoloc.Latitude, err = strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			fmt.Println("Error: parsing latitude", err.Error())
+			metrics.Rejected++
+			continue
 		}
 		geoloc.Longitude, err = strconv.ParseFloat(record[5], 64)
 		if err != nil {
 			fmt.Println("Error: parsing latitude", err.Error())
+			metrics.Rejected++
+			continue
 		}
 		geoloc.MValue, err = strconv.ParseInt(record[6], 10, 64)
 		if err != nil {
 			fmt.Println("Error: parsing latitude", err.Error())
+			metrics.Rejected++
+			continue
 		}
 		fmt.Println("Geoloc:", geoloc)
 		err = geodata.AddGeoData(&geoloc)
 		if err != nil {
 			fmt.Println("Error adding geo data", err.Error())
+			metrics.Rejected++
+			continue
 		}
-		fmt.Println("RECORD:", record)
-		fmt.Println("+++++++++++++++")
+		metrics.Imported++
 	}
 
-	err = recordFile.Close()
-	if err != nil {
-		fmt.Println("Error encountered closing file", err.Error())
-	}
+	metrics.Duration = time.Since(start)
+	return &metrics, nil
 }
