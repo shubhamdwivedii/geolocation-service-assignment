@@ -1,0 +1,24 @@
+version: "3.8"
+
+services: 
+  database: 
+    image: mysql 
+    environment: 
+      MYSQL_ROOT_PASSWORD: admin 
+    command: --default-authentication-plugin=mysql_native_password 
+    ports: 
+      - 4000:8080
+
+  backend: 
+    build: ./ # Dockerfile path
+    ports: 
+      - 3000:8080
+    environment: 
+      DB_URL: root:admin@tcp(database)/dockertest 
+
+    # command: ./docker-entrypoint.sh
+
+  # backend-test: 
+  #   image: geolocation-service-assignment_backend
+  #   command: go test 
+

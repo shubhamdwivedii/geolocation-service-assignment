@@ -27,8 +27,6 @@ func (gdh *GeoDataHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (gdh *GeoDataHandler) get(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("REQUEST", r.URL, r.URL.String())
-	fmt.Println("REQ BODY", r.Body)
 	segs := strings.Split(r.URL.String(), "/")
 	ip := segs[len(segs)-1]
 

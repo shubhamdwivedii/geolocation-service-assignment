@@ -39,12 +39,8 @@ type Metrics struct {
 	Imported int
 }
 
-func InitGeoData() (*GeoData, error) {
-	fmt.Println("INIT GEO DATA")
-	// DB_URL := os.Getenv("DB_URL")
-	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/geolocation"
-
-	URLS := strings.Split(DB_URL, "/")
+func InitGeoData(configurl string) (*GeoData, error) {
+	URLS := strings.Split(configurl, "/")
 	CONNECTION_URL := URLS[0]
 	DB_NAME := URLS[1]
 
@@ -53,7 +49,7 @@ func InitGeoData() (*GeoData, error) {
 
 	db, err := sql.Open("mysql", CONNECTION_URL+"/")
 	if err != nil {
-		log.Fatal("Unable to open connection to DB", err.Error())
+		log.Println("Unable to open connection to DB", err.Error())
 		return nil, err
 	} else {
 		fmt.Println("Connected to DB...")
@@ -83,6 +79,7 @@ func InitGeoData() (*GeoData, error) {
 	}, checkTable("geolocations", db)
 }
 
+// Move to sql file
 func checkTable(table string, db *sql.DB) error {
 	results, err := db.Query("SELECT * FROM " + table)
 	if err != nil {
@@ -176,8 +173,6 @@ func ReadCSVUrl(url string, geodata *GeoData) (*Metrics, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(resp)
 	reader := csv.NewReader(resp.Body)
 	metrics, err := importCSV(reader, geodata)
 	resp.Body.Close()
@@ -209,7 +204,6 @@ func importCSV(reader *csv.Reader, geodata *GeoData) (*Metrics, error) {
 		metrics.Total++
 
 		var geoloc Geolocation
-		fmt.Println("Record::", record)
 		geoloc.IP = record[0]
 		geoloc.CCode = record[1]
 		geoloc.Country = record[2]
@@ -232,13 +226,13 @@ func importCSV(reader *csv.Reader, geodata *GeoData) (*Metrics, error) {
 			metrics.Rejected++
 			continue
 		}
-		fmt.Println("Geoloc:", geoloc)
 		err = geodata.AddGeoData(&geoloc)
 		if err != nil {
 			fmt.Println("Error adding geo data", err.Error())
 			metrics.Rejected++
 			continue
 		}
+		fmt.Println("Imported:", geoloc)
 		metrics.Imported++
 	}
 
