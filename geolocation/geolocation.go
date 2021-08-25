@@ -76,7 +76,7 @@ func InitGeoData(configurl string) (*GeoData, error) {
 
 	return &GeoData{
 		db: db,
-	}, checkTable("geolocations", db)
+	}, checkTable("geolocation", db)
 }
 
 // Move to sql file
@@ -117,7 +117,7 @@ func (geodata *GeoData) AddGeoData(location *Geolocation) error {
 	defer geodata.Unlock()
 	geodata.Lock()
 
-	add_location, err := geodata.db.Prepare("INSERT INTO geolocations (ip, ccode, country, city, latitude, longitude, mystery) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	add_location, err := geodata.db.Prepare("INSERT INTO geolocation (ip, ccode, country, city, latitude, longitude, mystery) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (geodata *GeoData) GetGeoData(ip string) (Geolocation, error) {
 	geodata.Lock()
 
 	var geolocation Geolocation
-	qry := fmt.Sprintf("SELECT * from geolocations where ip = '%v'", ip)
+	qry := fmt.Sprintf("SELECT * from geolocation where ip = '%v'", ip)
 	err := geodata.db.QueryRow(qry).Scan(
 		&geolocation.IP,
 		&geolocation.CCode,
