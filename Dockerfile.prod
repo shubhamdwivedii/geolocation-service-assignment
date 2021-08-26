@@ -1,0 +1,17 @@
+# Build-Stage 
+FROM golang:alpine AS build-stage 
+COPY . /app
+WORKDIR /app 
+RUN go build -o bin/populate cmd/data/main.go 
+RUN go build -o bin/server cmd/server/main.go 
+
+
+# Production-Stage 
+FROM alpine 
+COPY --from=build-stage /app/bin /geolocation/
+COPY --from=build-stage /app/docker-entrypoint.prod.sh /geolocation/ 
+COPY --from=build-stage /app/wait-for /geolocation/
+COPY --from=build-stage /app/assignment/sample.csv /geolocation/assignment/sample.csv
+EXPOSE 8080
+CMD /geolocation/server
+# CMD Should be overwritten by docker-entrypoint.sh
