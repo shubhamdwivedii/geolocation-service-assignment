@@ -2,7 +2,6 @@ package sql
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"sync"
 
@@ -19,13 +18,10 @@ type Storage struct {
 	db *sql.DB
 }
 
-func NewStorage() (*Storage, error) {
+func NewStorage(connection string) (*Storage, error) {
 	var err error
 	s := new(Storage)
-
-	// DB_URL := os.Getenv("DB_URL")
-	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/geolocation"
-	s.db, err = initDb(DB_URL)
+	s.db, err = initDb(connection)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +51,6 @@ func (s *Storage) AddGeodata(gloc models.Geolocation) error {
 
 	_, err := query.RunWith(s.db).Exec()
 
-	qry, _, _ := query.ToSql()
-	fmt.Println("query >>>>", qry)
 	if err != nil {
 		return err
 	}

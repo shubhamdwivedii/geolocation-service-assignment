@@ -4,14 +4,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	httpHandler "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/http"
 	storageServices "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/services"
 	"github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage/sql"
 )
 
+// This will run the http server.
 func main() {
-	storage, _ := sql.NewStorage()
+	log.Println("Starting Server.....")
+	DB_URL := os.Getenv("DB_URL")
+	// DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/geolocation"
+
+	storage, _ := sql.NewStorage(DB_URL)
 
 	service := storageServices.NewService(storage)
 

@@ -6,4 +6,6 @@ WORKDIR /app
 
 EXPOSE 8080
 
-CMD go run main.go
+# RUN go run cmd/data/main.go 
+
+# CMD go run cmd/server/main.go

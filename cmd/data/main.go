@@ -10,15 +10,17 @@ import (
 )
 
 // This will populate DB with sample data
-
 func main() {
-	storage, _ := sql.NewStorage()
+	log.Println("Importing DB Data.....")
+	DB_URL := os.Getenv("DB_URL")
+	// DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/geolocation"
+	storage, _ := sql.NewStorage(DB_URL)
 
 	service := storageServices.NewService(storage)
 
 	pwd, _ := os.Getwd()
-	path := pwd[:len(pwd)-9] + "/assignment/sample.csv"
-	// Fix path later.
+	path := pwd + "/assignment/sample.csv"
+	// Assuming this is run from project root folder.
 
 	csvparser, err := parser.NewParser("csv")
 	if err != nil {

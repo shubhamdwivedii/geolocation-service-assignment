@@ -14,15 +14,14 @@ services:
     - ./db_init:/docker-entrypoint-initdb.d 
     # mysql image will automatically run any .sql or .sh files in /docker-entrypoint-initdb.d
 
-  # backend: 
-  #   build: ./ # Dockerfile path
-  #   ports: 
-  #     - 3000:8080
-  #   environment: 
-  #     DB_URL: root:admin@tcp(database)/dockertest 
+  backend: 
+    build: ./ # Dockerfile path
+    ports: 
+      - 3000:8080
+    environment: 
+      DB_URL: root:admin@tcp(database)/dockertest 
     
-
-    # command: ./docker-entrypoint.sh
+    command: sh docker-entrypoint.sh
 
   # backend-test: 
   #   image: geolocation-service-assignment_backend

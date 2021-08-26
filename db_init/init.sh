@@ -1,2 +1,3 @@
-# !/bin/bash 
-echo docker_db_test_init
+# !/bin/sh 
+
+echo "Testing Geolocation MySQL DB...."
