@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"strings"
 
-	storageServices "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/services"
+	st "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage"
 )
 
 type HttpHandler struct {
-	service storageServices.Service
+	storage st.Storage
 }
 
-func NewHandler(stServ storageServices.Service) http.Handler {
+func NewHandler(storage st.Storage) http.Handler {
 	var handler = HttpHandler{
-		service: stServ,
+		storage: storage,
 	}
 	return &handler
 }
@@ -33,7 +33,7 @@ func (handler *HttpHandler) get(w http.ResponseWriter, r *http.Request) {
 	segs := strings.Split(r.URL.String(), "/")
 	ip := segs[len(segs)-1]
 
-	geolocation, err := handler.service.GetGeodata(ip)
+	geolocation, err := handler.storage.GetGeodata(ip)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return

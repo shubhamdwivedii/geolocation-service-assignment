@@ -1,26 +1,23 @@
-package sql
+package storage
 
 import (
 	"database/sql"
 	"log"
-	"sync"
-
-	sq "github.com/Masterminds/squirrel"
-	_ "github.com/go-sql-driver/mysql"
 
 	// go get "github.com/Masterminds/squirrel"
-	"github.com/shubhamdwivedii/geolocation-service-assignment/models"
+	sq "github.com/Masterminds/squirrel"
+
+	_ "github.com/go-sql-driver/mysql"
+	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
 )
 
-// Move to models ??
-type Storage struct {
-	sync.Mutex
+type SQLStorage struct {
 	db *sql.DB
 }
 
-func NewStorage(connection string) (*Storage, error) {
+func NewSQLStorage(connection string) (Storage, error) {
 	var err error
-	s := new(Storage)
+	s := new(SQLStorage)
 	s.db, err = initDb(connection)
 	if err != nil {
 		return nil, err
@@ -40,11 +37,8 @@ func initDb(connection string) (*sql.DB, error) {
 	return db, nil
 }
 
-func (s *Storage) AddGeodata(gloc models.Geolocation) error {
+func (s *SQLStorage) AddGeodata(gloc Geolocation) error {
 	// check if all fields of gloc are valid (not empty)
-	defer s.Unlock()
-	s.Lock()
-
 	query := sq.Insert("geolocation").
 		Columns("ip", "ccode", "country", "city", "latitude", "longitude", "mystery").
 		Values(gloc.IP, gloc.CCode, gloc.Country, gloc.City, gloc.Latitude, gloc.Longitude, gloc.MValue)
@@ -57,11 +51,8 @@ func (s *Storage) AddGeodata(gloc models.Geolocation) error {
 	return nil
 }
 
-func (s *Storage) GetGeodata(ip string) (*models.Geolocation, error) {
-	defer s.Unlock()
-	s.Lock()
-
-	var gloc models.Geolocation
+func (s *SQLStorage) GetGeodata(ip string) (*Geolocation, error) {
+	var gloc Geolocation
 
 	query, args, err := sq.Select("*").From("geolocation").Where(sq.Eq{"ip": ip}).ToSql()
 

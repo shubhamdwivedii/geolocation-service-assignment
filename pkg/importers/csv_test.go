@@ -1,4 +1,4 @@
-package csv_test
+package importers_test
 
 import (
 	"encoding/csv"
@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	csvParser "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/parsers/csv"
+	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/importers"
 )
 
 func TestCSVParser(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCSVParser(t *testing.T) {
 		log.Println("Error Writing To Temp CSV...")
 	}
 
-	parser := new(csvParser.CSVParser)
+	parser := new(CSVParser)
 	pwd, _ := os.Getwd()
 	path := pwd + "/temp.csv"
 	log.Println(path)

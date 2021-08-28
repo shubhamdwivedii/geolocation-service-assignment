@@ -7,21 +7,20 @@ import (
 	"os"
 
 	httpHandler "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/http"
-	storageServices "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/services"
-	"github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage/sql"
+	sqlStorage "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage"
 )
 
 // This will run the http server.
 func main() {
 	log.Println("Starting Server.....")
 	DB_URL := os.Getenv("DB_URL")
-	// DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/geolocation"
+	// DB_URL := "root:admin@tcp(127.0.0.1:3306)/geolocation"
 
-	storage, _ := sql.NewStorage(DB_URL)
+	// FIX THESE KIND OF ERROR IN RESPONSE.
+	// {"error":"Error 1045: Access denied for user ''@'localhost' (using password: NO)"}
 
-	service := storageServices.NewService(storage)
-
-	handler := httpHandler.NewHandler(service)
+	storage, _ := sqlStorage.NewSQLStorage(DB_URL)
+	handler := httpHandler.NewHandler(storage)
 
 	port := ":8080"
 
