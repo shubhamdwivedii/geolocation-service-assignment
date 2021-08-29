@@ -43,6 +43,7 @@ func validateIP(ip string) bool {
 }
 
 func (s *SQLStorage) AddGeodata(gloc Geolocation) error {
+	log.Println("Adding geodata", gloc)
 	err := ValidateGeolocation(gloc)
 	if err != nil {
 		return err

@@ -11,12 +11,25 @@ import (
 // This will populate DB with sample data
 func main() {
 	log.Println("Importing DB Data.....")
-	DB_URL := os.Getenv("DB_URL")
-	// DB_URL := "root:admin@tcp(127.0.0.1:3306)/geolocation"
-	storage, _ := sqlStorage.NewSQLStorage(DB_URL)
+	// DB_URL := os.Getenv("DB_URL")
+	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/dockertest"
+
+	storage, err := sqlStorage.NewSQLStorage(DB_URL)
+
+	if err != nil {
+		log.Fatal("Error Initializing Storage...", err.Error())
+	}
 
 	pwd, _ := os.Getwd()
-	path := pwd + "/assignment/sample.csv"
+	// path := pwd + "/assignment/sample.csv"
+	pathArg := os.Args[1:]
+	if len(pathArg) <= 0 {
+		log.Fatal("No CSV File Path Given To Import...")
+	}
+	path := pwd + pathArg[0]
+
+	log.Println("path", path)
+
 	// Assuming this is run from project root folder.
 
 	// Modify to take path as command-line argument

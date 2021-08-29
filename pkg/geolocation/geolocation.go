@@ -49,6 +49,5 @@ func ValidateGeolocation(gloc Geolocation) error {
 	if gloc.Latitude > float64(90) || gloc.Latitude < float64(-90) {
 		return errors.New("Invalid Latitude Value.")
 	}
-
 	return nil
 }
