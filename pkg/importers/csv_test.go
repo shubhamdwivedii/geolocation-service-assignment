@@ -32,11 +32,13 @@ func TestCSVParser(t *testing.T) {
 		log.Println("Error Writing To Temp CSV...")
 	}
 
-	parser := new(CSVParser)
+	importer := new(CSVImporter)
 	pwd, _ := os.Getwd()
 	path := pwd + "/temp.csv"
 	log.Println(path)
-	importChannel, err := parser.Import(path)
+	importChannel, metricChannel, err := importer.Import(path)
+
+	fmt.Println("DO something with", metricChannel)
 
 	idx := 1
 	for glocation := range importChannel {

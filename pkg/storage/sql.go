@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"log"
+	"regexp"
 
 	// go get "github.com/Masterminds/squirrel"
 	sq "github.com/Masterminds/squirrel"
@@ -22,7 +23,6 @@ func NewSQLStorage(connection string) (Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return s, nil
 }
 
@@ -34,16 +34,25 @@ func initDb(connection string) (*sql.DB, error) {
 		return nil, err
 	}
 	log.Println("Connected to DB successfully...")
-	return db, nil
+	return db, db.Ping()
+}
+
+func validateIP(ip string) bool {
+	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
+	return re.MatchString(ip)
 }
 
 func (s *SQLStorage) AddGeodata(gloc Geolocation) error {
-	// check if all fields of gloc are valid (not empty)
+	err := ValidateGeolocation(gloc)
+	if err != nil {
+		return err
+	}
+
 	query := sq.Insert("geolocation").
 		Columns("ip", "ccode", "country", "city", "latitude", "longitude", "mystery").
 		Values(gloc.IP, gloc.CCode, gloc.Country, gloc.City, gloc.Latitude, gloc.Longitude, gloc.MValue)
 
-	_, err := query.RunWith(s.db).Exec()
+	_, err = query.RunWith(s.db).Exec()
 
 	if err != nil {
 		return err

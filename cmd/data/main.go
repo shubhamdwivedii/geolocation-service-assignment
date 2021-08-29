@@ -19,6 +19,8 @@ func main() {
 	path := pwd + "/assignment/sample.csv"
 	// Assuming this is run from project root folder.
 
+	// Modify to take path as command-line argument
+
 	csvImporter := importers.NewCSVImporter()
 
 	importChannel, metricsChannel, err := csvImporter.Import(path)

@@ -13,6 +13,13 @@ type HttpHandler struct {
 	storage st.Storage
 }
 
+// HttpHandler implements http.Handler Interface
+/*
+	http.Handler interafce {
+		ServeHTTP(http.RespohnseWriter, *http.Request)
+	}
+*/
+
 func NewHandler(storage st.Storage) http.Handler {
 	var handler = HttpHandler{
 		storage: storage,
