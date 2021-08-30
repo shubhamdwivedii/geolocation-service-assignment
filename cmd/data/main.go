@@ -28,12 +28,6 @@ func main() {
 	}
 	path := pwd + pathArg[0]
 
-	log.Println("path", path)
-
-	// Assuming this is run from project root folder.
-
-	// Modify to take path as command-line argument
-
 	csvImporter := importers.NewCSVImporter()
 
 	importChannel, metricsChannel, err := csvImporter.Import(path)

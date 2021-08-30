@@ -16,6 +16,7 @@ func TestCSVParser(t *testing.T) {
 		{"200.106.141.15", "SI", "Nepal", "DuBuquemouth", "-84.87503094689836", "7.206435933364332", "7823011346"},
 		{"160.103.7.140", "CZ", "Nicaragua", "New Neva", "-68.31023296602508", "-37.62435199624531", "7301823115"},
 		{"70.95.73.73", "TL", "Saudi Arabia", "Gradymouth", "-49.16675918861615", "-86.05920084416894", "2559997162"},
+		{"127.01.7.140", "INR", "India", "New Delhi", "-168.31023296602508", "-237.62435199624531", "7301823115"},
 	}
 
 	f, err := os.Create("temp.csv")
@@ -39,6 +40,7 @@ func TestCSVParser(t *testing.T) {
 	importChannel, metricChannel, err := importer.Import(path)
 
 	fmt.Println("DO something with", metricChannel)
+	// Add test for metric too.
 
 	idx := 1
 	for glocation := range importChannel {
@@ -69,6 +71,16 @@ func TestCSVParser(t *testing.T) {
 		if idx > len(records) {
 			break
 		}
+	}
+
+	metrics := <-metricChannel
+
+	if metrics.Imported != 3 {
+		t.Errorf("Expected Imported To Be 3 But Got %v in Metrics", metrics.Imported)
+	}
+
+	if metrics.Rejected != 1 {
+		t.Errorf("Expected Rejected To Be 1 But Got %v in Metrics", metrics.Rejected)
 	}
 
 	// Removing Temp CSV
