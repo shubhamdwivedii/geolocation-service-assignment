@@ -1,9 +1,7 @@
-package geolocation_test
+package geolocation
 
 import (
 	"testing"
-
-	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
 )
 
 func TestValidateGeolocation(t *testing.T) {
