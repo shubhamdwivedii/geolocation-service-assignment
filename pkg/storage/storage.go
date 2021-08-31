@@ -7,4 +7,5 @@ import (
 type Storage interface {
 	AddGeodata(Geolocation) error
 	GetGeodata(string) (*Geolocation, error)
+	GetAllByCCode(string) ([]*Geolocation, error)
 }

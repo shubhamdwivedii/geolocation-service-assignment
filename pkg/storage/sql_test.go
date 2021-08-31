@@ -40,4 +40,11 @@ func TestNewSQLStorage(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, *gloc, oloc, "Expected Both To Be Same.")
+
+	glocs, err := storage.GetAllByCCode("IN")
+	require.NoError(t, err)
+
+	for _, loc := range glocs {
+		assert.Equal(t, (*loc).CCode, "IN", "Country Code Should Match.")
+	}
 }

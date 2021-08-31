@@ -1,27 +1,19 @@
-package handler
+package service
 
 import (
-	"encoding/json"
 	"errors"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
-	sv "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/service"
-	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
+	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage"
 )
 
-func TestHandler(t *testing.T) {
+func TestNewService(t *testing.T) {
 	storage, _ := NewMockStorage()
-	service := sv.NewService(storage)
-
-	rr := httptest.NewRecorder()
-
-	handler := NewHandler(service)
+	service := NewService(storage)
 
 	oloc := Geolocation{
 		IP:        "127.42.24.1",
@@ -33,24 +25,37 @@ func TestHandler(t *testing.T) {
 		MValue:    7823011346,
 	}
 
-	// Adding Directly in Storage.
-	storage.AddGeodata(oloc)
+	oloc2 := Geolocation{
+		IP:        "192.65.42.10",
+		CCode:     "IN",
+		Country:   "India",
+		City:      "Delhi",
+		Longitude: -84.87503094689836,
+		Latitude:  7.206435933364332,
+		MValue:    7823011346,
+	}
 
-	r, err := http.NewRequest(http.MethodGet, "/geodata/127.42.24.1", nil)
+	err := service.AddGeodata(oloc)
+	require.NoError(t, err)
+	err = service.AddGeodata(oloc2)
 	require.NoError(t, err)
 
-	handler.ServeHTTP(rr, r)
-
-	rs := rr.Result()
-
-	body, err := ioutil.ReadAll(rs.Body)
+	gloc, err := service.GetGeodata(oloc.IP)
 	require.NoError(t, err)
 
-	var gloc Geolocation
-	err = json.Unmarshal(body, &gloc)
+	assert := assert.New(t)
+
+	assert.Equal(*gloc, oloc, "Expected Both To Be Same.")
+
+	glocs, err := service.GetAllByCCode("IN")
 	require.NoError(t, err)
 
-	assert.Equal(t, gloc, oloc, "They Should Be Equal.")
+	assert.Equal(len(glocs), 2, "Expected Length To Be 2.")
+
+	for _, gloc := range glocs {
+		assert.Equal((*gloc).Country, "INDIA", "Expected Country To Match.")
+		assert.Equal((*gloc).City, "DELHI", "Expected City To Match.")
+	}
 }
 
 /*********** MOCK DB Storage ***********/

@@ -86,3 +86,25 @@ func (s *SQLStorage) GetGeodata(ip string) (*Geolocation, error) {
 
 	return &gloc, nil
 }
+
+func (s *SQLStorage) GetAllByCCode(ccode string) ([]*Geolocation, error) {
+	var locations []*Geolocation
+
+	query := sq.Select("*").From("geolocation").Where(sq.Eq{"ccode": ccode})
+
+	rows, err := query.RunWith(s.db).Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var gloc Geolocation
+		err = rows.Scan(&gloc.IP, &gloc.CCode, &gloc.Country, &gloc.City, &gloc.Longitude, &gloc.Latitude, &gloc.MValue)
+		if err != nil {
+			return nil, err
+		}
+		locations = append(locations, &gloc)
+	}
+	return locations, nil
+}
