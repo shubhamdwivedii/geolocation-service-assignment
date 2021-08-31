@@ -36,7 +36,7 @@ func (*CSVImporter) Import(file string, service sv.Service) (<-chan Metrics, err
 	csvFile, err := os.Open(file)
 	if err != nil {
 		log.Println("Error: Reading CSV File:", err.Error())
-		return nil, err // ERRORSSSSS
+		return nil, err
 	}
 
 	reader := csv.NewReader(csvFile)

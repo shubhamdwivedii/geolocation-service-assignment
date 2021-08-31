@@ -15,10 +15,7 @@ import (
 func main() {
 	log.Println("Starting Server.....")
 	DB_URL := os.Getenv("DB_URL")
-	// DB_URL := "root:admin@tcp(127.0.0.1:3306)/geolocation"
-
-	// FIX THESE KIND OF ERROR IN RESPONSE.
-	// {"error":"Error 1045: Access denied for user ''@'localhost' (using password: NO)"}
+	// DB_URL := "root:admin@tcp(127.0.0.1:3306)/dockertest"
 
 	storage, err := sqlStorage.NewSQLStorage(DB_URL)
 

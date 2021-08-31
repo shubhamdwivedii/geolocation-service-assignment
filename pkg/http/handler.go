@@ -38,12 +38,15 @@ func (handler *HttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (handler *HttpHandler) get(w http.ResponseWriter, r *http.Request) {
 	segs := strings.Split(r.URL.String(), "/")
-	// SSSSSS r.URL.Query()
 	ip := segs[len(segs)-1]
 
 	geolocation, err := handler.service.GetGeodata(ip)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		if strings.Contains(err.Error(), "no rows in result set") {
+			respondWithError(w, http.StatusNotFound, "404 Not Found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Unexpected Error.")
+		}
 		return
 	}
 	respondWithJSON(w, http.StatusFound, geolocation)
