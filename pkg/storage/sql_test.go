@@ -30,7 +30,7 @@ func TestNewSQLStorage(t *testing.T) {
 
 	err = storage.AddGeodata(oloc)
 
-	if strings.Contains(err.Error(), "1062") {
+	if err != nil && strings.Contains(err.Error(), "1062") {
 		log.Println("Duplicate Entry Error... Continuing With Test...")
 	} else {
 		require.NoError(t, err)

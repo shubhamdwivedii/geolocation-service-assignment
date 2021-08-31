@@ -32,3 +32,5 @@ services:
   #   image: geolocation-service-assignment_backend
   #   command: go test 
 
+# Run this by "docker-compose -f docker-compose.prod.yml up"
+# "docker-compose -f docker-compose.prod.yml up -d" for detached mode. 

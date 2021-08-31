@@ -10,10 +10,7 @@ cd geolocation
 # Make sure all files are copied onto production container 
 
 echo "Preparing Database..."
-./populate 
+./populate /assignment/sample.csv
 
 echo "Running Server..."
 ./server 
-
-# Run this by "docker-compose -f docker-compose.prod.yml up"
-# "docker-compose -f docker-compose.prod.yml up -d" for detached mode. 

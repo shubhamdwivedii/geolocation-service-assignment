@@ -28,8 +28,8 @@ func TestHandler(t *testing.T) {
 		CCode:     "IN",
 		Country:   "India",
 		City:      "Delhi",
-		Longitude: -84.87503094689836,
 		Latitude:  7.206435933364332,
+		Longitude: -84.87503094689836,
 		MValue:    7823011346,
 	}
 

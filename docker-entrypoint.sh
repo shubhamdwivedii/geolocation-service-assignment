@@ -5,7 +5,7 @@ echo "Waiting for DB to start..."
 # https://github.com/eficode/wait-for
 
 echo "Preparing Database..."
-go run cmd/data/main.go
+go run cmd/data/main.go /assignment/sample.csv
 
 echo "Running Server..."
 go run cmd/server/main.go

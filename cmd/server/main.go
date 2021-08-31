@@ -7,6 +7,7 @@ import (
 	"os"
 
 	httpHandler "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/http"
+	sv "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/service"
 	sqlStorage "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage"
 )
 
@@ -19,8 +20,15 @@ func main() {
 	// FIX THESE KIND OF ERROR IN RESPONSE.
 	// {"error":"Error 1045: Access denied for user ''@'localhost' (using password: NO)"}
 
-	storage, _ := sqlStorage.NewSQLStorage(DB_URL)
-	handler := httpHandler.NewHandler(storage)
+	storage, err := sqlStorage.NewSQLStorage(DB_URL)
+
+	service := sv.NewService(storage)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	handler := httpHandler.NewHandler(service)
 
 	port := ":8080"
 
@@ -31,6 +39,6 @@ func main() {
 	})
 
 	fmt.Println("Listening on Port", port)
-	err := http.ListenAndServe(port, nil)
+	err = http.ListenAndServe(port, nil)
 	log.Fatal(err)
 }

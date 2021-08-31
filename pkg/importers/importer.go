@@ -3,7 +3,7 @@ package importers
 import (
 	"time"
 
-	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
+	sv "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/service"
 )
 
 type Metrics struct {
@@ -14,5 +14,5 @@ type Metrics struct {
 }
 
 type Importer interface {
-	Import(string) (<-chan Geolocation, <-chan Metrics, error)
+	Import(string, sv.Service) (<-chan Metrics, error)
 }

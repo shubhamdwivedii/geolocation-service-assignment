@@ -10,8 +10,8 @@ type Geolocation struct {
 	CCode     string  `json:"country_code"`
 	Country   string  `json:"country"`
 	City      string  `json:"city"`
-	Longitude float64 `json:"longitude"`
 	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 	MValue    int64   `json:"mystery_value"`
 }
 
@@ -42,12 +42,13 @@ func ValidateGeolocation(gloc Geolocation) error {
 		return errors.New("Invalid City Name.")
 	}
 
+	if gloc.Latitude > float64(90) || gloc.Latitude < float64(-90) {
+		return errors.New("Invalid Latitude Value.")
+	}
+
 	if gloc.Longitude > float64(180) || gloc.Longitude < float64(-180) {
 		return errors.New("Invalid Longitude Value.")
 	}
 
-	if gloc.Latitude > float64(90) || gloc.Latitude < float64(-90) {
-		return errors.New("Invalid Latitude Value.")
-	}
 	return nil
 }

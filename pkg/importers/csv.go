@@ -11,6 +11,7 @@ import (
 	"time"
 
 	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
+	sv "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/service"
 )
 
 type CSVImporter struct {
@@ -27,36 +28,34 @@ func NewCSVImporter() Importer {
 }
 
 // Will import Geolocations from CSV file and emit them on a channel
-func (*CSVImporter) Import(file string) (<-chan Geolocation, <-chan Metrics, error) {
+func (*CSVImporter) Import(file string, service sv.Service) (<-chan Metrics, error) {
 	log.Println("Importing CSV....")
 
-	results := make(chan Geolocation)
 	mtrchan := make(chan Metrics)
 
 	csvFile, err := os.Open(file)
 	if err != nil {
 		log.Println("Error: Reading CSV File:", err.Error())
-		return nil, nil, err // ERRORSSSSS
+		return nil, err // ERRORSSSSS
 	}
 
 	reader := csv.NewReader(csvFile)
-	go func() {
-		// defer close(results)
-		// defer close(mtrchan)
-		header, err := reader.Read()
-		if err != nil {
-			log.Println("Error:", err.Error())
-		}
-		log.Println("Headers", header)
-		// check headers
+	header, err := reader.Read()
+	if err != nil {
+		log.Println("Error:", err.Error())
+	}
+	if len(header) != 7 {
+		return nil, errors.New("Invalid CSV File.")
+	}
 
+	go func() {
 		var metrics Metrics
 		start := time.Now()
 
 		for {
 			record, err := reader.Read()
 			if err == io.EOF {
-				log.Println("END OF FILE REACHED...")
+				log.Println("End Of Sample Data Reached...")
 				break
 			} else if err != nil {
 				fmt.Println("Error:", err.Error())
@@ -69,16 +68,21 @@ func (*CSVImporter) Import(file string) (<-chan Geolocation, <-chan Metrics, err
 				metrics.Rejected++
 				continue
 			}
-			results <- *gloc
+			// results <- *gloc
+			err = service.AddGeodata(*gloc)
+			if err != nil {
+				metrics.Rejected++
+				continue
+			}
+
 			metrics.Imported++
 		}
 		// Check Why defer above wasn't working...
-		close(results)
 		metrics.Duration = time.Since(start)
 		mtrchan <- metrics
 		close(mtrchan)
 	}()
-	return results, mtrchan, nil
+	return mtrchan, nil
 }
 
 func validateRecord(record []string) bool {
@@ -104,8 +108,8 @@ func mapGeolocation(record []string) (*Geolocation, error) {
 	gloc.Country = record[2]
 	gloc.City = record[3]
 	var lterr, lgerr, mverr error
-	gloc.Longitude, lgerr = strconv.ParseFloat(record[4], 64)
-	gloc.Latitude, lterr = strconv.ParseFloat(record[5], 64)
+	gloc.Latitude, lterr = strconv.ParseFloat(record[4], 64)
+	gloc.Longitude, lgerr = strconv.ParseFloat(record[5], 64)
 	gloc.MValue, mverr = strconv.ParseInt(record[6], 10, 64)
 
 	if lterr != nil || lgerr != nil || mverr != nil {
