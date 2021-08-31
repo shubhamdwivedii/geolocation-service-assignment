@@ -1,7 +1,12 @@
 package storage
 
 import (
+	"log"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
 )
@@ -11,10 +16,7 @@ func TestNewSQLStorage(t *testing.T) {
 	// Make sure DB and Table are created.
 
 	storage, err := NewSQLStorage(connect)
-
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	oloc := Geolocation{
 		IP:        "127.42.24.1",
@@ -28,35 +30,14 @@ func TestNewSQLStorage(t *testing.T) {
 
 	err = storage.AddGeodata(oloc)
 
-	if err != nil {
-		t.Fatal(err)
+	if strings.Contains(err.Error(), "1062") {
+		log.Println("Duplicate Entry Error... Continuing With Test...")
+	} else {
+		require.NoError(t, err)
 	}
 
 	gloc, err := storage.GetGeodata(oloc.IP)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if gloc.IP != oloc.IP {
-		t.Errorf("Expected Response Geolocation IP to be %v but got %v", oloc.IP, gloc.IP)
-	}
-	if gloc.CCode != oloc.CCode {
-		t.Errorf("Expected Response Geolocation CCode to be %v but got %v", oloc.CCode, gloc.CCode)
-	}
-	if gloc.Country != oloc.Country {
-		t.Errorf("Expected Response Geolocation Country to be %v but got %v", oloc.Country, gloc.Country)
-	}
-	if gloc.City != oloc.City {
-		t.Errorf("Expected Response Geolocation City to be %v but got %v", oloc.City, gloc.City)
-	}
-	if gloc.Longitude != oloc.Longitude {
-		t.Errorf("Expected Response Geolocation Longitude to be %v but got %v", oloc.Longitude, gloc.Longitude)
-	}
-	if gloc.Latitude != oloc.Latitude {
-		t.Errorf("Expected Response Geolocation Latitude to be %v but got %v", oloc.Latitude, gloc.Latitude)
-	}
-	if gloc.MValue != oloc.MValue {
-		t.Errorf("Expected Response Geolocation MValue to be %v but got %v", oloc.MValue, gloc.MValue)
-	}
+	assert.Equal(t, *gloc, oloc, "Expected Both To Be Same.")
 }

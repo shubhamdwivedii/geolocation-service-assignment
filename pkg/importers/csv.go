@@ -104,8 +104,8 @@ func mapGeolocation(record []string) (*Geolocation, error) {
 	gloc.Country = record[2]
 	gloc.City = record[3]
 	var lterr, lgerr, mverr error
-	gloc.Latitude, lterr = strconv.ParseFloat(record[4], 64)
-	gloc.Longitude, lgerr = strconv.ParseFloat(record[5], 64)
+	gloc.Longitude, lgerr = strconv.ParseFloat(record[4], 64)
+	gloc.Latitude, lterr = strconv.ParseFloat(record[5], 64)
 	gloc.MValue, mverr = strconv.ParseInt(record[6], 10, 64)
 
 	if lterr != nil || lgerr != nil || mverr != nil {

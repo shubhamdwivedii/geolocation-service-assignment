@@ -10,6 +10,8 @@ import (
 
 	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/geolocation"
 	. "github.com/shubhamdwivedii/geolocation-service-assignment/pkg/storage"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandler(t *testing.T) {
@@ -32,52 +34,23 @@ func TestHandler(t *testing.T) {
 	storage.AddGeodata(oloc)
 
 	r, err := http.NewRequest(http.MethodGet, "/geodata/127.42.24.1", nil)
-
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	handler.ServeHTTP(rr, r)
 
 	rs := rr.Result()
 
 	body, err := ioutil.ReadAll(rs.Body)
-
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	var gloc Geolocation
 	err = json.Unmarshal(body, &gloc)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if gloc.IP != oloc.IP {
-		t.Errorf("Expected Response Geolocation IP to be %v but got %v", oloc.IP, gloc.IP)
-	}
-	if gloc.CCode != oloc.CCode {
-		t.Errorf("Expected Response Geolocation CCode to be %v but got %v", oloc.CCode, gloc.CCode)
-	}
-	if gloc.Country != oloc.Country {
-		t.Errorf("Expected Response Geolocation Country to be %v but got %v", oloc.Country, gloc.Country)
-	}
-	if gloc.City != oloc.City {
-		t.Errorf("Expected Response Geolocation City to be %v but got %v", oloc.City, gloc.City)
-	}
-	if gloc.Longitude != oloc.Longitude {
-		t.Errorf("Expected Response Geolocation Longitude to be %v but got %v", oloc.Longitude, gloc.Longitude)
-	}
-	if gloc.Latitude != oloc.Latitude {
-		t.Errorf("Expected Response Geolocation Latitude to be %v but got %v", oloc.Latitude, gloc.Latitude)
-	}
-	if gloc.MValue != oloc.MValue {
-		t.Errorf("Expected Response Geolocation MValue to be %v but got %v", oloc.MValue, gloc.MValue)
-	}
-
+	assert.Equal(t, gloc, oloc, "They Should Be Equal.")
 }
 
+/*********** MOCK DB Storage ***********/
 type MockStorage struct {
 	db map[string]Geolocation
 }

@@ -12,7 +12,7 @@ import (
 func main() {
 	log.Println("Importing DB Data.....")
 	// DB_URL := os.Getenv("DB_URL")
-	DB_URL := "root:hesoyam@tcp(127.0.0.1:3306)/dockertest"
+	DB_URL := "root:admin@tcp(127.0.0.1:3306)/dockertest"
 
 	storage, err := sqlStorage.NewSQLStorage(DB_URL)
 

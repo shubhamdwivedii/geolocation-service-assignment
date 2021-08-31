@@ -2,13 +2,15 @@ package geolocation
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateGeolocation(t *testing.T) {
 	tests := []struct {
 		name string
 		gloc Geolocation
-		want bool
+		err  bool
 	}{
 		{
 			name: "Valid Geolocation",
@@ -21,7 +23,7 @@ func TestValidateGeolocation(t *testing.T) {
 				Latitude:  7.206435933364332,
 				MValue:    7823011346,
 			},
-			want: true,
+			err: false,
 		},
 		{
 			name: "Invalid Country Code",
@@ -34,7 +36,7 @@ func TestValidateGeolocation(t *testing.T) {
 				Latitude:  -37.62435199624531,
 				MValue:    7301823115,
 			},
-			want: false,
+			err: true,
 		},
 		{
 			name: "Invalid Longitude",
@@ -47,7 +49,7 @@ func TestValidateGeolocation(t *testing.T) {
 				Latitude:  -86.05920084416894,
 				MValue:    2559997162,
 			},
-			want: false,
+			err: true,
 		},
 		{
 			name: "Invalid IP Address",
@@ -60,7 +62,7 @@ func TestValidateGeolocation(t *testing.T) {
 				Latitude:  -163.26218895343357,
 				MValue:    1337885276,
 			},
-			want: false,
+			err: true,
 		},
 	}
 
@@ -68,13 +70,10 @@ func TestValidateGeolocation(t *testing.T) {
 		// t.Run() runs a sub-test for each test case.
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateGeolocation(tt.gloc)
-			valid := true
-			if err != nil {
-				valid = false
-			}
-
-			if valid != tt.want {
-				t.Errorf("Expected Geolocation Validity to be %v, But Got %v", tt.want, valid)
+			if tt.err {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}

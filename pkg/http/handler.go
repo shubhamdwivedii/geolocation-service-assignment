@@ -38,6 +38,7 @@ func (handler *HttpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (handler *HttpHandler) get(w http.ResponseWriter, r *http.Request) {
 	segs := strings.Split(r.URL.String(), "/")
+	// SSSSSS r.URL.Query()
 	ip := segs[len(segs)-1]
 
 	geolocation, err := handler.storage.GetGeodata(ip)

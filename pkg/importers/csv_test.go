@@ -6,6 +6,9 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCSVParser(t *testing.T) {
@@ -19,52 +22,38 @@ func TestCSVParser(t *testing.T) {
 
 	f, err := os.Create("temp.csv")
 	defer f.Close()
-
-	if err != nil {
-		log.Println("Error Creating File...")
-	}
+	require.NoError(t, err)
 
 	w := csv.NewWriter(f)
 	err = w.WriteAll(records) // calls Flush internally
-
-	if err != nil {
-		log.Println("Error Writing To Temp CSV...")
-	}
+	require.NoError(t, err)
 
 	importer := new(CSVImporter)
 	pwd, _ := os.Getwd()
 	path := pwd + "/temp.csv"
-	log.Println(path)
-	importChannel, metricChannel, err := importer.Import(path)
 
-	fmt.Println("DO something with", metricChannel)
-	// Add test for metric too.
+	importChannel, metricChannel, err := importer.Import(path)
+	require.NoError(t, err)
 
 	idx := 1
-	for glocation := range importChannel {
+	for gloc := range importChannel {
 		record := records[idx]
-		log.Println("Comparing Record:", record, "With Parsed Geolocation", glocation)
-		if glocation.IP != record[0] {
-			t.Errorf("Parsed IP Not Match.")
-		}
-		if glocation.CCode != record[1] {
-			t.Errorf("Parsed Country Code Not Match.")
-		}
-		if glocation.Country != record[2] {
-			t.Errorf("Parsed Country Not Match.")
-		}
-		if glocation.City != record[3] {
-			t.Errorf("Parsed City Not Match.")
-		}
-		if fmt.Sprintf("%v", glocation.Latitude) != record[4] {
-			t.Errorf("Parsed Latitude Not Match.")
-		}
-		if fmt.Sprintf("%v", glocation.Longitude) != record[5] {
-			t.Errorf("Parsed Longitude Not Match.")
-		}
-		if fmt.Sprintf("%v", glocation.MValue) != record[6] {
-			t.Errorf("Parsed Mystery Value Not Match.")
-		}
+		assert := assert.New(t)
+
+		assert.Equal(gloc.IP, record[0], "Parsed IP Should Match.")
+
+		assert.Equal(gloc.CCode, record[1], "Parsed Country Code Should Match.")
+
+		assert.Equal(gloc.Country, record[2], "Parsed Country Should Match.")
+
+		assert.Equal(gloc.City, record[3], "Parsed City Should Match.")
+
+		assert.Equal(fmt.Sprintf("%v", gloc.Longitude), record[4], "Parsed Longitude Should Match.")
+
+		assert.Equal(fmt.Sprintf("%v", gloc.Latitude), record[5], "Parsed Latitude Should Match.")
+
+		assert.Equal(fmt.Sprintf("%v", gloc.MValue), record[6], "Parsed Mystery Value Should Match.")
+
 		idx++
 		if idx > len(records) {
 			break
@@ -72,14 +61,8 @@ func TestCSVParser(t *testing.T) {
 	}
 
 	metrics := <-metricChannel
-
-	if metrics.Imported != 3 {
-		t.Errorf("Expected Imported To Be 3 But Got %v in Metrics", metrics.Imported)
-	}
-
-	if metrics.Rejected != 1 {
-		t.Errorf("Expected Rejected To Be 1 But Got %v in Metrics", metrics.Rejected)
-	}
+	assert.Equal(t, metrics.Imported, 3, "Expected Imported To Be 3.")
+	assert.Equal(t, metrics.Rejected, 1, "Expected Rejected To Be 1.")
 
 	// Removing Temp CSV
 	err = os.Remove("temp.csv")
