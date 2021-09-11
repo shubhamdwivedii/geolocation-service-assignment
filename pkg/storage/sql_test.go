@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewSQLStorage(t *testing.T) {
-	connect := "root:hesoyam@tcp(127.0.0.1:3306)/dockertest"
+	connect := "root:admin@tcp(127.0.0.1:3306)/dockertest"
 	// Make sure DB and Table are created.
 
 	storage, err := NewSQLStorage(connect)
